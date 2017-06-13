@@ -1,24 +1,26 @@
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
 import numpy as np
-import os
+import sys
+
+root = "/home/local2/yhasson/first-person-action-recognition/"
+sys.path.insert(0, root + "blender-scripts/")
+
+from utils import filesys
+
+
 
 scene = bpy.context.scene
 cam = bpy.context.scene.camera
 armature = bpy.data.objects["Armature"]
 
-export_folder = '/home/local2/yhasson/blender-assets/Renders/'
+data_folder = root + "data/"
+export_folder = data_folder + "blender-renders/"
 image_folder = export_folder + 'Images/'
 annot_folder = export_folder + 'Annots/'
 
-# Create folders if they do not exist
-def create_if_missing_dir(folder_path):
-    directory = os.path.dirname(folder_path)
-    if not os.path.exists(directory):
-        os.mkdir(directory)
-
-create_if_missing_dir(image_folder)
-create_if_missing_dir(annot_folder)
+filesys.create_dir(image_folder)
+filesys.create_dir(annot_folder)
 
 frame_nb = 10
 scene.frame_set(frame_nb)
@@ -28,6 +30,34 @@ camera_names = ['Headcam', 'Chestcam']
 bone_nb = 20
 fingers = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
 bone_idxs = ['1', '2', '3', '4']
+
+image_name =  "pexels-photo-table-wood.jpeg"
+# Load background image
+background_folder= data_folder + "/blender-assets/backgrounds/"
+background_path = background_folder + image_name
+background_img = bpy.data.images.load(background_path)
+
+scene.world.use_nodes = True
+world = scene.world
+node_tree = bpy.data.worlds[world.name].node_tree
+
+# Create or retrive environment texture node
+env_node = node_tree.nodes.get("Environment Texture")
+if env_node is None:
+    env_node = node_tree.nodes.new(type="ShaderNodeTexEnvironment")
+    back_node = node_tree.nodes["Background"]
+
+    # Move new node
+    env_node.location.x = back_node.location.x - 300
+    env_node.location.y = back_node.location.y
+
+    # Link to background node
+    env_col_out = env_node.outputs['Color']
+    back_col_in = back_node.inputs['Color']
+    node_tree.links.new(env_col_out, back_col_in)
+
+# Set image
+env_node.image = background_img
 
 for camera_name in camera_names:
     cam = bpy.context.scene.objects[camera_name]
@@ -58,8 +88,8 @@ for camera_name in camera_names:
             coords_2d[position] = [coord_2d[0] *
                                    x_render, coord_2d[1] * y_render]
             position += 1
-    annot_file_2d = annot_folder + camera_name + "2d_" +str(frame_nb) + ".txt"
-    annot_file_3d = annot_folder + camera_name + "3d_" + str(frame_nb) + ".txt"
+    annot_file_2d = annot_folder + camera_name + str(frame_nb) + "_2d.txt"
+    annot_file_3d = annot_folder + camera_name + str(frame_nb) + "_3d.txt"
     np.savetxt(annot_file_2d, coords_2d)
     np.savetxt(annot_file_3d, coords_3d)
     print(coords_2d)
