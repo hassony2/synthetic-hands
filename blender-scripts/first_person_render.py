@@ -8,7 +8,7 @@ sys.path.insert(0, root + "blender-scripts/")
 
 from utils import filesys
 
-
+render = False
 
 scene = bpy.context.scene
 cam = bpy.context.scene.camera
@@ -22,78 +22,87 @@ annot_folder = export_folder + 'Annots/'
 filesys.create_dir(image_folder)
 filesys.create_dir(annot_folder)
 
-
-
 bone_nb = 20
 fingers = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
 bone_idxs = ['1', '2', '3', '4']
 
-image_name =  "pexels-photo-table-wood.jpeg"
 # Load background image
-background_folder= data_folder + "/blender-assets/backgrounds/"
+image_name = "pexels-photo-table-wood.jpeg"
+background_folder = data_folder + "/blender-assets/backgrounds/"
 background_path = background_folder + image_name
 background_img = bpy.data.images.load(background_path)
 
-scene.world.use_nodes = True
-world = scene.world
-node_tree = bpy.data.worlds[world.name].node_tree
+# Set cycles params
+scene.render.engine = 'CYCLES'
+scene.cycles.film_transparent = True
 
-# Create or retrive environment texture node
-env_node = node_tree.nodes.get("Environment Texture")
-if env_node is None:
-    env_node = node_tree.nodes.new(type="ShaderNodeTexEnvironment")
-    back_node = node_tree.nodes["Background"]
+# Get node tree
+scene.use_nodes = True
+node_tree = scene.node_tree
 
-    # Move new node
-    env_node.location.x = back_node.location.x - 300
-    env_node.location.y = back_node.location.y
+# Remove existing nodes
+for n in node_tree.nodes:
+    node_tree.nodes.remove(n)
 
-    # Link to background node
-    env_col_out = env_node.outputs['Color']
-    back_col_in = back_node.inputs['Color']
-    node_tree.links.new(env_col_out, back_col_in)
+# Create nodes
+comp_node = node_tree.nodes.new(type="CompositorNodeComposite")
+render_node = node_tree.nodes.new(type="CompositorNodeRLayers")
+alpha_node = node_tree.nodes.new(type="CompositorNodeAlphaOver")
+inp_node = node_tree.nodes.new(type="CompositorNodeImage")
+scale_node = node_tree.nodes.new(type="CompositorNodeScale")
 
-# Set image
-env_node.image = background_img
+scale_node.space = "RENDER_SIZE"
+scale_node.frame_method = "FIT"
 
-# Render frames
-frame_beg = scene.frame_start
-frame_end = scene.frame_end
-camera_names = ['Headcam', 'Chestcam']
+# Link nodes
+node_tree.links.new(render_node.outputs[0], alpha_node.inputs[2])
 
-for camera_name in camera_names:
-    for frame_nb in range(frame_beg, frame_end + 1):
-        scene.frame_set(frame_nb)
-        cam = bpy.context.scene.objects[camera_name]
-        bpy.context.scene.camera = cam
-        # Render
-        scene.render.filepath = image_folder + \
-            'render-' + camera_name + str(frame_nb)
-        scene.render.image_settings.file_format = 'PNG'
-        bpy.ops.render.render(write_still=True)
+node_tree.links.new(inp_node.outputs[0], scale_node.inputs[0])
+node_tree.links.new(scale_node.outputs[0], alpha_node.inputs[1])
 
-        # Save coordinates
-        side = "Right"
-        coords_2d = np.empty((bone_nb, 2))
-        coords_3d = np.empty((bone_nb, 3))
-        position = 0
-        for finger in fingers:
-            for bone_idx in bone_idxs:
-                finger_tip_name = "mixamorig:{side}Hand{finger}{bone_idx}".format(side=side,
-                                                                                  finger=finger,
-                                                                                  bone_idx=bone_idx)
-                finger_bone = armature.pose.bones[finger_tip_name]
-                coord_3d = armature.matrix_world * finger_bone.tail
-                coord_2d = list(world_to_camera_view(scene, cam, coord_3d))
-                coords_3d[position] = list(coord_3d)
-                render_scale = scene.render.resolution_percentage / 100
-                x_render = int(scene.render.resolution_x * render_scale)
-                y_render = int(scene.render.resolution_y * render_scale)
-                coords_2d[position] = [coord_2d[0] *
-                                       x_render, coord_2d[1] * y_render]
-                position += 1
-        annot_file_2d = annot_folder + camera_name + str(frame_nb) + "_2d.txt"
-        annot_file_3d = annot_folder + camera_name + str(frame_nb) + "_3d.txt"
-        np.savetxt(annot_file_2d, coords_2d)
-        np.savetxt(annot_file_3d, coords_3d)
-        print("processed frame ", frame_nb)
+node_tree.links.new(alpha_node.outputs[0], comp_node.inputs[0])
+
+inp_node.image = background_img
+
+if render:
+    # Render frames
+    frame_beg = scene.frame_start
+    frame_end = scene.frame_end
+    camera_names = ['Headcam', 'Chestcam']
+
+    for camera_name in camera_names:
+        for frame_nb in range(frame_beg, frame_end + 1):
+            scene.frame_set(frame_nb)
+            cam = bpy.context.scene.objects[camera_name]
+            bpy.context.scene.camera = cam
+            # Render
+            scene.render.filepath = image_folder + \
+                'render-' + camera_name + str(frame_nb)
+            scene.render.image_settings.file_format = 'PNG'
+            bpy.ops.render.render(write_still=True)
+
+            # Save coordinates
+            side = "Right"
+            coords_2d = np.empty((bone_nb, 2))
+            coords_3d = np.empty((bone_nb, 3))
+            position = 0
+            for finger in fingers:
+                for bone_idx in bone_idxs:
+                    finger_tip_name = "mixamorig:{side}Hand{finger}{bone_idx}".format(side=side,
+                                                                                      finger=finger,
+                                                                                      bone_idx=bone_idx)
+                    finger_bone = armature.pose.bones[finger_tip_name]
+                    coord_3d = armature.matrix_world * finger_bone.tail
+                    coord_2d = list(world_to_camera_view(scene, cam, coord_3d))
+                    coords_3d[position] = list(coord_3d)
+                    render_scale = scene.render.resolution_percentage / 100
+                    x_render = int(scene.render.resolution_x * render_scale)
+                    y_render = int(scene.render.resolution_y * render_scale)
+                    coords_2d[position] = [coord_2d[0] *
+                                           x_render, coord_2d[1] * y_render]
+                    position += 1
+            annot_file_2d = annot_folder + camera_name + str(frame_nb) + "_2d.txt"
+            annot_file_3d = annot_folder + camera_name + str(frame_nb) + "_3d.txt"
+            np.savetxt(annot_file_2d, coords_2d)
+            np.savetxt(annot_file_3d, coords_3d)
+            print("processed frame ", frame_nb)
