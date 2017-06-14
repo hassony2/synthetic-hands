@@ -22,10 +22,7 @@ annot_folder = export_folder + 'Annots/'
 filesys.create_dir(image_folder)
 filesys.create_dir(annot_folder)
 
-frame_nb = 10
-scene.frame_set(frame_nb)
 
-camera_names = ['Headcam', 'Chestcam']
 
 bone_nb = 20
 fingers = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
@@ -59,39 +56,44 @@ if env_node is None:
 # Set image
 env_node.image = background_img
 
-for camera_name in camera_names:
-    cam = bpy.context.scene.objects[camera_name]
-    bpy.context.scene.camera = cam
-    # Render
-    scene.render.filepath = image_folder + \
-        'render-' + camera_name + str(frame_nb)
-    scene.render.image_settings.file_format = 'PNG'
-    bpy.ops.render.render(write_still=True)
+# Render frames
+frame_beg = scene.frame_start
+frame_end = scene.frame_end
+camera_names = ['Headcam', 'Chestcam']
 
-    # Save coordinates
-    side = "Right"
-    coords_2d = np.empty((bone_nb, 2))
-    coords_3d = np.empty((bone_nb, 3))
-    position = 0
-    for finger in fingers:
-        for bone_idx in bone_idxs:
-            finger_tip_name = "mixamorig:{side}Hand{finger}{bone_idx}".format(side=side,
-                                                                              finger=finger,
-                                                                              bone_idx=bone_idx)
-            finger_bone = armature.pose.bones[finger_tip_name]
-            coord_3d = armature.matrix_world * finger_bone.tail
-            coord_2d = list(world_to_camera_view(scene, cam, coord_3d))
-            coords_3d[position] = list(coord_3d)
-            render_scale = scene.render.resolution_percentage / 100
-            x_render = int(scene.render.resolution_x * render_scale)
-            y_render = int(scene.render.resolution_y * render_scale)
-            coords_2d[position] = [coord_2d[0] *
-                                   x_render, coord_2d[1] * y_render]
-            position += 1
-    annot_file_2d = annot_folder + camera_name + str(frame_nb) + "_2d.txt"
-    annot_file_3d = annot_folder + camera_name + str(frame_nb) + "_3d.txt"
-    np.savetxt(annot_file_2d, coords_2d)
-    np.savetxt(annot_file_3d, coords_3d)
-    print(coords_2d)
-    print(coords_3d)
-    print(position)
+for camera_name in camera_names:
+    for frame_nb in range(frame_beg, frame_end + 1):
+        scene.frame_set(frame_nb)
+        cam = bpy.context.scene.objects[camera_name]
+        bpy.context.scene.camera = cam
+        # Render
+        scene.render.filepath = image_folder + \
+            'render-' + camera_name + str(frame_nb)
+        scene.render.image_settings.file_format = 'PNG'
+        bpy.ops.render.render(write_still=True)
+
+        # Save coordinates
+        side = "Right"
+        coords_2d = np.empty((bone_nb, 2))
+        coords_3d = np.empty((bone_nb, 3))
+        position = 0
+        for finger in fingers:
+            for bone_idx in bone_idxs:
+                finger_tip_name = "mixamorig:{side}Hand{finger}{bone_idx}".format(side=side,
+                                                                                  finger=finger,
+                                                                                  bone_idx=bone_idx)
+                finger_bone = armature.pose.bones[finger_tip_name]
+                coord_3d = armature.matrix_world * finger_bone.tail
+                coord_2d = list(world_to_camera_view(scene, cam, coord_3d))
+                coords_3d[position] = list(coord_3d)
+                render_scale = scene.render.resolution_percentage / 100
+                x_render = int(scene.render.resolution_x * render_scale)
+                y_render = int(scene.render.resolution_y * render_scale)
+                coords_2d[position] = [coord_2d[0] *
+                                       x_render, coord_2d[1] * y_render]
+                position += 1
+        annot_file_2d = annot_folder + camera_name + str(frame_nb) + "_2d.txt"
+        annot_file_3d = annot_folder + camera_name + str(frame_nb) + "_3d.txt"
+        np.savetxt(annot_file_2d, coords_2d)
+        np.savetxt(annot_file_3d, coords_3d)
+        print("processed frame ", frame_nb)
