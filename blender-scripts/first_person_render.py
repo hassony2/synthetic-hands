@@ -19,8 +19,20 @@ export_folder = data_folder + "blender-renders/"
 image_folder = export_folder + 'Images/'
 annot_folder = export_folder + 'Annots/'
 
+coord_2d_folder = annot_folder + '2Dcoord/'
+coord_3d_folder = annot_folder + '3Dcoord/'
+depth_folder = annot_folder + 'depth/'
+segm_folder = annot_folder + 'hand-segm/'
+
+# Create folders if absent
 filesys.create_dir(image_folder)
 filesys.create_dir(annot_folder)
+
+filesys.create_dir(coord_2d_folder)
+filesys.create_dir(coord_3d_folder)
+filesys.create_dir(depth_folder)
+filesys.create_dir(segm_folder)
+
 
 bone_nb = 20
 fingers = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
@@ -62,11 +74,16 @@ node_tree.links.new(render_node.outputs[0], alpha_node.inputs[2])
 comp_node = node_tree.nodes.new(type="CompositorNodeComposite")
 node_tree.links.new(alpha_node.outputs[0], comp_node.inputs[0])
 
+# Add depth
 depth_node = node_tree.nodes.new('CompositorNodeOutputFile')
 depth_node.format.file_format = 'OPEN_EXR'
-depth_node.base_path = annot_folder
+depth_node.base_path = depth_folder
 node_tree.links.new(render_node.outputs['Z'], depth_node.inputs[0])
 
+# Add segmentation
+depth_node = node_tree.nodes.new('CompositorNodeOutputFile')
+depth_node.format.file_format = 'OPEN_EXR'
+depth_node.base_path = segm_folder
 if render:
     # Render frames
     frame_beg = scene.frame_start
@@ -105,8 +122,8 @@ if render:
                     coords_2d[position] = [coord_2d[0] *
                                            x_render, coord_2d[1] * y_render]
                     position += 1
-            annot_file_2d = annot_folder + camera_name + str(frame_nb) + "_2d.txt"
-            annot_file_3d = annot_folder + camera_name + str(frame_nb) + "_3d.txt"
+            annot_file_2d = coord_2d_folder + camera_name + str(frame_nb) + "_2d.txt"
+            annot_file_3d = coord_3d_folder + camera_name + str(frame_nb) + "_3d.txt"
             np.savetxt(annot_file_2d, coords_2d)
             np.savetxt(annot_file_3d, coords_3d)
             print("processed frame ", frame_nb)
