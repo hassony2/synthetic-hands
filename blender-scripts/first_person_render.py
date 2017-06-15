@@ -8,7 +8,7 @@ sys.path.insert(0, root + "blender-scripts/")
 
 from utils import filesys
 
-render = False
+render = True
 
 scene = bpy.context.scene
 cam = bpy.context.scene.camera
@@ -45,30 +45,29 @@ for n in node_tree.nodes:
     node_tree.nodes.remove(n)
 
 # Create nodes
-comp_node = node_tree.nodes.new(type="CompositorNodeComposite")
-render_node = node_tree.nodes.new(type="CompositorNodeRLayers")
-alpha_node = node_tree.nodes.new(type="CompositorNodeAlphaOver")
 inp_node = node_tree.nodes.new(type="CompositorNodeImage")
-scale_node = node_tree.nodes.new(type="CompositorNodeScale")
+inp_node.image = background_img
 
+scale_node = node_tree.nodes.new(type="CompositorNodeScale")
 scale_node.space = "RENDER_SIZE"
 scale_node.frame_method = "FIT"
+node_tree.links.new(inp_node.outputs[0], scale_node.inputs[0])
 
-# Link nodes
+render_node = node_tree.nodes.new(type="CompositorNodeRLayers")
+
+alpha_node = node_tree.nodes.new(type="CompositorNodeAlphaOver")
+node_tree.links.new(scale_node.outputs[0], alpha_node.inputs[1])
 node_tree.links.new(render_node.outputs[0], alpha_node.inputs[2])
 
-node_tree.links.new(inp_node.outputs[0], scale_node.inputs[0])
-node_tree.links.new(scale_node.outputs[0], alpha_node.inputs[1])
-
+comp_node = node_tree.nodes.new(type="CompositorNodeComposite")
 node_tree.links.new(alpha_node.outputs[0], comp_node.inputs[0])
-
-inp_node.image = background_img
 
 if render:
     # Render frames
     frame_beg = scene.frame_start
     frame_end = scene.frame_end
-    camera_names = ['Headcam', 'Chestcam']
+    # camera_names = ['Headcam', 'Chestcam']
+    camera_names = ['Headcam']
 
     for camera_name in camera_names:
         for frame_nb in range(frame_beg, frame_end + 1):
