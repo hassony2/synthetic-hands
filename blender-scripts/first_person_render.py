@@ -62,6 +62,11 @@ node_tree.links.new(render_node.outputs[0], alpha_node.inputs[2])
 comp_node = node_tree.nodes.new(type="CompositorNodeComposite")
 node_tree.links.new(alpha_node.outputs[0], comp_node.inputs[0])
 
+depth_node = node_tree.nodes.new('CompositorNodeOutputFile')
+depth_node.format.file_format = 'OPEN_EXR'
+depth_node.base_path = annot_folder
+node_tree.links.new(render_node.outputs['Z'], depth_node.inputs[0])
+
 if render:
     # Render frames
     frame_beg = scene.frame_start
@@ -105,3 +110,6 @@ if render:
             np.savetxt(annot_file_2d, coords_2d)
             np.savetxt(annot_file_3d, coords_3d)
             print("processed frame ", frame_nb)
+            # REMOVE ME
+            break
+            # REMOVE ME
