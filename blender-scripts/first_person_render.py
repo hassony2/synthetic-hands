@@ -3,9 +3,10 @@ from bpy_extras.object_utils import world_to_camera_view
 import numpy as np
 import sys
 
-root = "/home/local2/yhasson/first-person-action-recognition/"
-sys.path.insert(0, root + "blender-scripts/")
+sys.path.insert(
+    0, "/home/local2/yhasson/first-person-action-recognition/blender-scripts")
 
+from settings import params
 from utils import filesys
 
 render = True
@@ -14,33 +15,27 @@ scene = bpy.context.scene
 cam = bpy.context.scene.camera
 armature = bpy.data.objects["Armature"]
 
-data_folder = root + "data/"
-export_folder = data_folder + "blender-renders/"
-image_folder = export_folder + 'Images/'
-annot_folder = export_folder + 'Annots/'
+data_folder = params["data_folder"]
+rgb_folder = params["rgb_folder"]
+depth_folder = params["depth_folder"]
+coord_2d_folder = params["coord_2d_folder"]
+coord_3d_folder = params["coord_2d_folder"]
+segm_folder = params["segm_folder"]
 
-coord_2d_folder = annot_folder + '2Dcoord/'
-coord_3d_folder = annot_folder + '3Dcoord/'
-depth_folder = annot_folder + 'depth/'
-segm_folder = annot_folder + 'hand-segm/'
 
 # Create folders if absent
-filesys.create_dir(image_folder)
-filesys.create_dir(annot_folder)
-
 filesys.create_dir(coord_2d_folder)
 filesys.create_dir(coord_3d_folder)
 filesys.create_dir(depth_folder)
 filesys.create_dir(segm_folder)
-
 
 bone_nb = 20
 fingers = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
 bone_idxs = ['1', '2', '3', '4']
 
 # Load background image
-image_name = "pexels-photo-table-wood.jpeg"
-background_folder = data_folder + "/blender-assets/backgrounds/"
+image_name = "uci-ego-seq1-951.jpg"
+background_folder = params["background_folder"]
 background_path = background_folder + image_name
 background_img = bpy.data.images.load(background_path)
 
@@ -116,7 +111,7 @@ if render:
             cam = bpy.context.scene.objects[camera_name]
             bpy.context.scene.camera = cam
             # Render
-            scene.render.filepath = image_folder + \
+            scene.render.filepath = rgb_folder + \
                 'render-' + camera_name + str(frame_nb)
             scene.render.image_settings.file_format = 'PNG'
             bpy.ops.render.render(write_still=True)
@@ -141,8 +136,10 @@ if render:
                     coords_2d[position] = [coord_2d[0] *
                                            x_render, coord_2d[1] * y_render]
                     position += 1
-            annot_file_2d = coord_2d_folder + camera_name + str(frame_nb) + "_2d.txt"
-            annot_file_3d = coord_3d_folder + camera_name + str(frame_nb) + "_3d.txt"
+            annot_file_2d = coord_2d_folder + \
+                camera_name + str(frame_nb) + "_2d.txt"
+            annot_file_3d = coord_3d_folder + \
+                camera_name + str(frame_nb) + "_3d.txt"
             np.savetxt(annot_file_2d, coords_2d)
             np.savetxt(annot_file_3d, coords_3d)
             print("processed frame ", frame_nb)
