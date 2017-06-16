@@ -62,7 +62,7 @@ inp_node.image = background_img
 
 scale_node = node_tree.nodes.new(type="CompositorNodeScale")
 scale_node.space = "RENDER_SIZE"
-scale_node.frame_method = "FIT"
+scale_node.frame_method = "CROP"
 node_tree.links.new(inp_node.outputs[0], scale_node.inputs[0])
 
 render_node = node_tree.nodes.new(type="CompositorNodeRLayers")
