@@ -81,9 +81,15 @@ depth_node.base_path = depth_folder
 node_tree.links.new(render_node.outputs['Z'], depth_node.inputs[0])
 
 # Add segmentation
-depth_node = node_tree.nodes.new('CompositorNodeOutputFile')
-depth_node.format.file_format = 'OPEN_EXR'
-depth_node.base_path = segm_folder
+scene.render.layers['RenderLayer'].use_pass_material_index = True
+
+body_mat = bpy.data.materials['Material.003']
+body_mat.pass_index = 1
+segm_node = node_tree.nodes.new('CompositorNodeOutputFile')
+segm_node.format.file_format = 'OPEN_EXR'
+segm_node.base_path = segm_folder
+node_tree.links.new(render_node.outputs['IndexMA'], segm_node.inputs[0])
+
 if render:
     # Render frames
     frame_beg = scene.frame_start
