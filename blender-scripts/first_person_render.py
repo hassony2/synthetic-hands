@@ -15,12 +15,13 @@ scene = bpy.context.scene
 cam = bpy.context.scene.camera
 armature = bpy.data.objects["Armature"]
 
-data_folder = params["data_folder"]
-rgb_folder = params["rgb_folder"]
-depth_folder = params["depth_folder"]
-coord_2d_folder = params["coord_2d_folder"]
-coord_3d_folder = params["coord_2d_folder"]
-segm_folder = params["segm_folder"]
+folders = params["folders"]
+data_folder = folders["data"]
+rgb_folder = folders["rgb"]
+depth_folder = folders["depth"]
+coord_2d_folder = folders["coord_2d"]
+coord_3d_folder = folders["coord_2d"]
+segm_folder = folders["segm"]
 
 
 # Create folders if absent
@@ -35,7 +36,7 @@ bone_idxs = ['1', '2', '3', '4']
 
 # Load background image
 image_name = "uci-ego-seq1-951.jpg"
-background_folder = params["background_folder"]
+background_folder = folders["background"]
 background_path = background_folder + image_name
 background_img = bpy.data.images.load(background_path)
 
@@ -104,6 +105,7 @@ if render:
     frame_end = scene.frame_end
     # camera_names = ['Headcam', 'Chestcam']
     camera_names = ['Headcam']
+    camera_names = ['Camera']
 
     for camera_name in camera_names:
         for frame_nb in range(frame_beg, frame_end + 1):

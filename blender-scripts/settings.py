@@ -21,20 +21,23 @@ coord_3d_folder = annot_folder + "3Dcoord/"
 segm_folder = annot_folder + "segm/"
 
 params = {}
-params["data_folder"] = data_folder
-params["script_folder"] = root
-params["asset_folder"] = asset_folder
-params["export_folder"] = export_folder
+folders = {}
+params["folders"] = folders
 
-params["image_folder"] = image_folder
-params["annot_folder"] = annot_folder
+folders["data"] = data_folder
+folders["scrip"] = root
+folders["asset"] = asset_folder
+folders["export"] = export_folder
 
-params["coord_2d_folder"] = coord_2d_folder
-params["coord_3d_folder"] = coord_3d_folder
-params["segm_folder"] = segm_folder
+folders["image"] = image_folder
+folders["annot"] = annot_folder
 
-params["depth_folder"] = depth_folder
-params["rgb_folder"] = rgb_folder
+folders["coord_2d"] = coord_2d_folder
+folders["coord_3d"] = coord_3d_folder
+folders["segm"] = segm_folder
 
-params["background_folder"] = background_folder
-params["scene_folder"] = scene_folder
+folders["depth"] = depth_folder
+folders["rgb"] = rgb_folder
+
+folders["background"] = background_folder
+folders["scene"] = scene_folder
