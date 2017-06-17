@@ -12,6 +12,7 @@ from utils import filesys
 
 arm = bpy.data.objects['Armature']
 cam = bpy.data.objects['Camera']
+scene = bpy.context.scene
 
 # Clear camera constraints
 for const in cam.constraints:
@@ -27,12 +28,10 @@ for folder in params['folders'].values():
 
 # Get background images
 bg_folder = params["folders"]["background"]
-bg_names = [bg_folder + filen for filen in  os.listdir(bg_folder)]
+bg_names = [bg_folder + filen for filen in os.listdir(bg_folder)]
 bg_img = bpy.data.images.load(bg_names[0])
 
-
-
-
+blender.set_cycle_nodes(scene, params, background_img=bg_img)
 
 
 
