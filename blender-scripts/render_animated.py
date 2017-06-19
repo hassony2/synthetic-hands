@@ -16,8 +16,6 @@ reload(blender)
 reload(filesys)
 
 arm = bpy.data.objects['Armature']
-camera_name = 'Camera'
-cam = bpy.data.objects[camera_name]
 scene = bpy.context.scene
 
 folders = params['folders']
@@ -32,11 +30,7 @@ bone_names = ["mixamorig_RightHand{0}{1}".format(finger, idx)
 actions = ['PlayGuitar', 'PickupObject']
 spots = ['Spot1', 'Spot2', 'Spot3']
 spot_values = list(range(0, 1001, 200))
-
-# Clear camera constraints
-for const in cam.constraints:
-    cam.constraints.remove(const)
-
+camera_names = ['Camera', 'Camera2']
 
 for folder in params['folders'].values():
     filesys.create_dir(folder)
@@ -55,19 +49,24 @@ render_nbs = 10000
 
 fileprefix = "remy-"
 for render_nb in range(render_nbs):
+    # Set camera
+    camera_name = random.choice(camera_names)
+    cam = bpy.data.objects[camera_name]
+    # Clear camera constraints
+    for const in cam.constraints:
+        cam.constraints.remove(const)
     # Camera follows hand
     finger = random.choice(fingers)
     bone_idx = random.choice(bone_idxs)
     bone_name = 'mixamorig_RightHand{finger}{idx}'.format(finger=finger,
                                                           idx=bone_idx)
-    const = blender.follow_bone(arm, bone_name=bone_name, track_axis='z',
+    const = blender.follow_bone(arm, camera_name, bone_name=bone_name, track_axis='z',
                                 track_axis_neg=True, up_axis='y')
 
     # Randomly pick background
     bg_name = random.choice(bg_names)
     bg_img = bpy.data.images.load(bg_name)
 
-    # TODO find a way to adapt the filename to handle >9999
     filename = fileprefix + "{idx}-".format(idx=render_nb)
     blender.set_cycle_nodes(scene, background_img=bg_img, filename=filename,
                             segm=True, segm_folder=segm_folder,
