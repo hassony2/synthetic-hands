@@ -1,6 +1,9 @@
-import numpy as np
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
+import numpy as np
+import random
+
+from utils.debug import timeit
 
 
 def coordinates(scene, cam, armature, keypoint_bones):
@@ -20,6 +23,7 @@ def coordinates(scene, cam, armature, keypoint_bones):
     return coords_2d, coords_3d
 
 
+@timeit
 def render(scene, cam, rgb_folder, img_name):
     """
     Render images according to cycle nodes
@@ -30,28 +34,35 @@ def render(scene, cam, rgb_folder, img_name):
     bpy.ops.render.render(write_still=True)
 
 
+@timeit
 def render_frames(scene, cam, arm, folders,
-                  bone_names, file_template="render-{0:04d}"):
-    for frame_nb in range(scene.frame_start, scene.frame_end + 1):
-        scene.frame_set(frame_nb)
-        bpy.context.scene.camera = cam
+                  bone_names, file_template="render-{0:04d}",
+                  frame_nb=None):
+    """
+    Renders images and annotations
 
-        # Render images
-        img_name = file_template.format(frame_nb)
-        render(scene, cam, folders['rgb'], img_name)
+    :frame_nb: idx of the frame to render, random if None
+    """
 
-        # Save coordinates
-        coords_2d, coords_3d = coordinates(
-            scene, cam, arm, bone_names)
-        annot_file_2d = folders['coord_2d'] + img_name + ".txt"
-        annot_file_3d = folders['coord_3d'] + img_name + ".txt"
-        np.savetxt(annot_file_2d, coords_2d)
-        np.savetxt(annot_file_3d, coords_3d)
+    if frame_nb is None:
+        frame_nbs = list(range(scene.frame_start, scene.frame_end + 1))
+        frame_nb = random.choice(frame_nbs)
+    scene.frame_set(frame_nb)
+    bpy.context.scene.camera = cam
 
-        # TODO
-        break
+    # Render images
+    img_name = file_template.format(frame_nb)
+    render(scene, cam, folders['rgb'], img_name)
 
+    # Save coordinates
+    coords_2d, coords_3d = coordinates(
+        scene, cam, arm, bone_names)
+    annot_file_2d = folders['coord_2d'] + img_name + ".txt"
+    annot_file_3d = folders['coord_3d'] + img_name + ".txt"
+    np.savetxt(annot_file_2d, coords_2d)
+    np.savetxt(annot_file_3d, coords_3d)
 
+@timeit
 def follow_bone(armature, camera_name="Camera",
                 bone_name="mixamorig_RightHandMiddle4",
                 track_axis=None, track_axis_neg=False,
@@ -70,6 +81,7 @@ def follow_bone(armature, camera_name="Camera",
     return track_bone
 
 
+@timeit
 def set_cycle_nodes(scene, background_img, filename,
                     segm=True, segm_folder=None,
                     segm_mats=[],
