@@ -30,6 +30,7 @@ def render(scene, cam, rgb_folder, img_name):
     """
     scene.camera = cam
     scene.render.filepath = rgb_folder + img_name
+    print(img_name)
     scene.render.image_settings.file_format = 'PNG'
     bpy.ops.render.render(write_still=True)
 
@@ -37,7 +38,7 @@ def render(scene, cam, rgb_folder, img_name):
 @timeit
 def render_frames(scene, cam, arm, folders,
                   bone_names, file_template="render-{0:04d}",
-                  frame_nb=None):
+                  frame_nb=None, rendering_idx=None):
     """
     Renders images and annotations
 
@@ -51,7 +52,10 @@ def render_frames(scene, cam, arm, folders,
     bpy.context.scene.camera = cam
 
     # Render images
-    img_name = file_template.format(frame_nb)
+    suffix = "{0:04d}".format(frame_nb)
+    if rendering_idx is not None:
+        suffix = str(rendering_idx) + "-" + suffix
+    img_name = file_template + suffix
     render(scene, cam, folders['rgb'], img_name)
 
     # Save coordinates

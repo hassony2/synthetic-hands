@@ -30,6 +30,8 @@ bone_names = ["mixamorig_RightHand{0}{1}".format(finger, idx)
               for idx in bone_idxs]
 
 actions = ['PlayGuitar', 'PickupObject']
+spots = ['Spot1', 'Spot2', 'Spot3']
+spot_values = list(range(0, 1001, 200))
 
 # Clear camera constraints
 for const in cam.constraints:
@@ -66,7 +68,7 @@ for render_nb in range(render_nbs):
     bg_img = bpy.data.images.load(bg_name)
 
     # TODO find a way to adapt the filename to handle >9999
-    filename = fileprefix + "00"
+    filename = fileprefix + "{idx}-".format(idx=render_nb)
     blender.set_cycle_nodes(scene, background_img=bg_img, filename=filename,
                             segm=True, segm_folder=segm_folder,
                             segm_mats=["Bodymat"],
@@ -77,8 +79,16 @@ for render_nb in range(render_nbs):
     action = bpy.data.actions[action_name]
     arm.animation_data.action = action
 
-    file_template = fileprefix + "{0:06d}"
+    # Randomly change light emission of spots
+    for spot_name in spots:
+        spot = bpy.data.lamps[spot_name]
+        spot_value = random.choice(spot_values)
+        spot.node_tree.nodes["Emission"].inputs[1].default_value = spot_value
+
+    file_template = fileprefix
     blender.render_frames(scene, cam, arm,
                           params['folders'],
                           bone_names,
-                          file_template=file_template)
+                          file_template=file_template,
+                          rendering_idx=render_nb)
+    break
