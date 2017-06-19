@@ -51,7 +51,7 @@ segm_folder = folders['segm']
 # Render
 rgb_folder = folders['rgb']
 
-render_nbs = 1000
+render_nbs = 10000
 
 fileprefix = "remy-"
 for render_nb in range(render_nbs):
@@ -91,4 +91,3 @@ for render_nb in range(render_nbs):
                           bone_names,
                           file_template=file_template,
                           rendering_idx=render_nb)
-    break

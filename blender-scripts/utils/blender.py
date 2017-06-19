@@ -30,7 +30,6 @@ def render(scene, cam, rgb_folder, img_name):
     """
     scene.camera = cam
     scene.render.filepath = rgb_folder + img_name
-    print(img_name)
     scene.render.image_settings.file_format = 'PNG'
     bpy.ops.render.render(write_still=True)
 

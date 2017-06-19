@@ -6,14 +6,15 @@ from settings import params
 from utils import filesys
 from utils import reading
 
-rgb_folder = params["rgb_folder"]
-depth_folder = params["depth_folder"]
-coord_2d_folder = params["coord_2d_folder"]
-coord_3d_folder = params["coord_2d_folder"]
-segm_folder = params["segm_folder"]
+folders = params["folders"]
+rgb_folder = folders["rgb"]
+depth_folder = folders["depth"]
+coord_2d_folder = folders["coord_2d"]
+coord_3d_folder = folders["coord_3d"]
+segm_folder = folders["segm"]
 
 # Display segmentation
-img_name = 'Image0001.exr'
+img_name = 'remy-0-0124.exr'
 segm_path = segm_folder + img_name
 print(segm_path)
 segm = cv2.imread(segm_path, flags=0)
