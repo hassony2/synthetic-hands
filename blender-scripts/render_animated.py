@@ -40,8 +40,19 @@ depth_folder = params['folders']['depth']
 segm_folder = params['folders']['segm']
 
 blender.set_cycle_nodes(scene, background_img=bg_img,
-                        segm=False, segm_folder=segm_folder,
+                        segm=True, segm_folder=segm_folder,
+                        segm_mats=["Bodymat"],
                         depth_folder=depth_folder)
+
+# Render
+for frame_nb in range(scene.frame_start, scene.frame_stop + 1):
+    scene.frame_set(frame_nb)
+    bpy.contest.scene.camera = cam
+
+    # Save coordinates
+    side = "Right"
+    
+    
 
 
 

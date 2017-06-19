@@ -1,4 +1,24 @@
+import numpy as np
 import bpy
+from bpy_extras.object_utils import world_to_camera_view
+
+
+def coordinates(scene, cam, armature, keypoint_bones):
+    bone_nb = len(keypoint_bones)
+    coords_2d = np.empty((bone_nb, 2))
+    coords_3d = np.empty((bone_nb, 3))
+    for i, bone_name in enumerate(keypoint_bones):
+        bone = armature.pose.bones[bone_name]
+        coord_3d = armature.matrix_world * bone.tail
+        coord_2d = list(world_to_camera_view(scene, cam, coord_3d))
+        coords_3d[i] = list(coord_3d)
+        render_scale = scene.render.resolution_percentage / 100
+        x_render = int(scene.render.resolution_x * render_scale)
+        y_render = int(scene.render.resolution_y * render_scale)
+        coords_2d[i] = [coord_2d[0] *
+                               x_render, coord_2d[1] * y_render]
+    return coords_2d, coords_3d
+
 
 def follow_bone(armature, camera_name="Camera",
                 bone_name="mixamorig_RightHandMiddle4",
@@ -81,5 +101,5 @@ def set_cycle_nodes(scene, background_img,
         segm_node.format.file_format = 'OPEN_EXR'
         segm_node.base_path = segm_folder
         segm_node.location = 200, -200
-        node_tree.links.new(render_node.outputs['IndexMA'], segm_node.inputs[0])
-
+        node_tree.links.new(
+            render_node.outputs['IndexMA'], segm_node.inputs[0])

@@ -74,21 +74,18 @@ if render:
             coords_2d = np.empty((bone_nb, 2))
             coords_3d = np.empty((bone_nb, 3))
             position = 0
+
+            # Save 2D coordinates
+            finger_names = []
             for finger in fingers:
                 for bone_idx in bone_idxs:
                     finger_tip_name = "mixamorig:{side}Hand{finger}{bone_idx}".format(side=side,
                                                                                       finger=finger,
                                                                                       bone_idx=bone_idx)
-                    finger_bone = armature.pose.bones[finger_tip_name]
-                    coord_3d = armature.matrix_world * finger_bone.tail
-                    coord_2d = list(world_to_camera_view(scene, cam, coord_3d))
-                    coords_3d[position] = list(coord_3d)
-                    render_scale = scene.render.resolution_percentage / 100
-                    x_render = int(scene.render.resolution_x * render_scale)
-                    y_render = int(scene.render.resolution_y * render_scale)
-                    coords_2d[position] = [coord_2d[0] *
-                                           x_render, coord_2d[1] * y_render]
-                    position += 1
+                    finger_names.append(finger_tip_name)
+
+            coords_2d, coords_3d = blender.coordinates(
+                scene, cam, armature, finger_names)
             annot_file_2d = coord_2d_folder + \
                 camera_name + str(frame_nb) + "_2d.txt"
             annot_file_3d = coord_3d_folder + \
