@@ -18,11 +18,15 @@ def follow_bone(armature, camera_name="Camera",
     return track_bone
 
 
-def set_cycle_nodes(scene, params, background_img):
-    # Get relevant folder paths
-    folders = params["folders"]
-    depth_folder = folders["depth"]
-    segm_folder = folders["segm"]
+def set_cycle_nodes(scene, background_img,
+                    segm=True, segm_folder=None,
+                    segm_mats=[],
+                    depth_folder=None):
+    """
+    :param scene: blender scene
+    :param background_img: blender image
+    :param segm_mats: list of names in blender of materials to segment
+    """
 
     # Get node tree
     scene.use_nodes = True
@@ -64,18 +68,18 @@ def set_cycle_nodes(scene, params, background_img):
 
     # Add segmentation
     # Activate 'IndexMA' output for render layer
-    scene.render.layers['RenderLayer'].use_pass_material_index = True
+    if segm:
+        scene.render.layers['RenderLayer'].use_pass_material_index = True
 
-    # Set material index
-    body_mat = bpy.data.materials['Material.003']
-    body_mat.pass_index = 1
-    mug_mat = bpy.data.materials['mia_material_x2SG']
-    mug_mat.pass_index = 2
+        # Set material index
+        for i, mat in enumerate(segm_mats):
+            body_mat = bpy.data.materials[mat]
+            body_mat.pass_index = i + 1
 
-    # Add material index renderint (<==> segmentation)
-    segm_node = node_tree.nodes.new('CompositorNodeOutputFile')
-    segm_node.format.file_format = 'OPEN_EXR'
-    segm_node.base_path = segm_folder
-    segm_node.location = 200, -200
-    node_tree.links.new(render_node.outputs['IndexMA'], segm_node.inputs[0])
+        # Add material index render int (<==> segmentation)
+        segm_node = node_tree.nodes.new('CompositorNodeOutputFile')
+        segm_node.format.file_format = 'OPEN_EXR'
+        segm_node.base_path = segm_folder
+        segm_node.location = 200, -200
+        node_tree.links.new(render_node.outputs['IndexMA'], segm_node.inputs[0])
 

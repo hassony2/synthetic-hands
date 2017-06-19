@@ -1,4 +1,5 @@
 import bpy
+from importlib import reload
 import numpy as np
 import os
 import sys
@@ -9,6 +10,10 @@ sys.path.insert(
 from settings import params
 from utils import blender
 from utils import filesys
+
+# Insure modules are reloaded in blender
+reload(blender)
+reload(filesys)
 
 arm = bpy.data.objects['Armature']
 cam = bpy.data.objects['Camera']
@@ -31,7 +36,14 @@ bg_folder = params["folders"]["background"]
 bg_names = [bg_folder + filen for filen in os.listdir(bg_folder)]
 bg_img = bpy.data.images.load(bg_names[0])
 
-blender.set_cycle_nodes(scene, params, background_img=bg_img)
+depth_folder = params['folders']['depth']
+segm_folder = params['folders']['segm']
+
+blender.set_cycle_nodes(scene, background_img=bg_img,
+                        segm=False, segm_folder=segm_folder,
+                        depth_folder=depth_folder)
+
+
 
 
 
