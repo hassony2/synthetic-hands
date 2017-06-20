@@ -1,13 +1,17 @@
 import bpy
+import configparser
 from importlib import reload
 import sys
 
+absolute_root = '/home/local2/yhasson/first-person-action-recognition/'
 sys.path.insert(
-    0, "/home/local2/yhasson/first-person-action-recognition/blender-scripts")
+    0, absolute_root + 'blender-scripts/')
 
-from settings import params
 from utils import blender
 from utils import filesys
+
+config = configparser.ConfigParser()
+config.read(absolute_root + 'config.ini')
 
 # Insure modules are reloaded in blender
 reload(blender)
@@ -19,7 +23,7 @@ scene = bpy.context.scene
 cam = bpy.context.scene.camera
 arm = bpy.data.objects["Armature"]
 
-folders = params["folders"]
+folders = config["folders"]
 data_folder = folders["data"]
 rgb_folder = folders["rgb"]
 depth_folder = folders["depth"]
@@ -64,6 +68,6 @@ if render:
 
         file_template = filename + "{0:04d}"
         blender.render_frames(scene, cam, arm,
-                              params['folders'],
+                              folders,
                               bone_names,
                               file_template=file_template)

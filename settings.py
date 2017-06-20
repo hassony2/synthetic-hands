@@ -1,4 +1,8 @@
+import configparser
+config = configparser.ConfigParser()
+
 root = "/home/local2/yhasson/first-person-action-recognition/"
+blender_script_folder = root + "blender-scripts/"
 data_folder = root + "data/"
 
 export_folder = data_folder + "blender-renders/"
@@ -20,12 +24,11 @@ coord_2d_folder = annot_folder + "2Dcoord/"
 coord_3d_folder = annot_folder + "3Dcoord/"
 segm_folder = annot_folder + "segm/"
 
-params = {}
 folders = {}
-params["folders"] = folders
 
+folders["root"] = root
 folders["data"] = data_folder
-folders["scrip"] = root
+folders["blender_script"] = blender_script_folder
 folders["asset"] = asset_folder
 folders["export"] = export_folder
 
@@ -41,3 +44,7 @@ folders["rgb"] = rgb_folder
 
 folders["background"] = background_folder
 folders["scene"] = scene_folder
+config["folders"] = folders
+
+with open('config.ini', 'w') as configfile:
+    config.write(configfile)
