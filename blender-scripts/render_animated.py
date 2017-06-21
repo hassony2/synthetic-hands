@@ -14,7 +14,7 @@ from utils import filesys
 
 config = configparser.ConfigParser()
 config.read(absolute_root + 'config.ini')
-render = False
+render = True
 
 # Insure modules are reloaded in blender
 reload(blender)
@@ -23,14 +23,12 @@ reload(filesys)
 arm = bpy.data.objects['Armature']
 scene = bpy.context.scene
 
-print(config.sections())
 folders = config['folders']
-print(folders)
 
 # Hand bone name variables
 fingers = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
 bone_idxs = ['1', '2', '3', '4']
-bone_names = ["mixamorig_RightHand{0}{1}".format(finger, idx)
+bone_names = ['mixamorig_RightHand{0}{1}'.format(finger, idx)
               for finger in fingers
               for idx in bone_idxs]
 
@@ -55,7 +53,7 @@ rgb_folder = folders['rgb']
 
 render_nbs = 10000
 
-fileprefix = "malcolm-"
+fileprefix = 'malcolm-'
 if render:
     for render_nb in range(render_nbs):
         # Set camera
@@ -76,10 +74,10 @@ if render:
         bg_name = random.choice(bg_names)
         bg_img = bpy.data.images.load(bg_name)
 
-        filename = fileprefix + "{idx}-".format(idx=render_nb)
+        filename = fileprefix + '{idx}-'.format(idx=render_nb)
         blender.set_cycle_nodes(scene, background_img=bg_img, filename=filename,
                                 segm=True, segm_folder=segm_folder,
-                                segm_mats=["Bodymat"],
+                                segm_mats=['Bodymat'],
                                 depth_folder=depth_folder)
 
         # Randomly pick action
@@ -91,7 +89,7 @@ if render:
         for spot_name in spots:
             spot = bpy.data.lamps[spot_name]
             spot_value = random.choice(spot_values)
-            spot.node_tree.nodes["Emission"].inputs[1].default_value = spot_value
+            spot.node_tree.nodes['Emission'].inputs[1].default_value = spot_value
 
         file_template = fileprefix
         blender.render_frames(scene, cam, arm,

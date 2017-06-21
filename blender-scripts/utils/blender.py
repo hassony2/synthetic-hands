@@ -6,13 +6,19 @@ import random
 from utils.debug import timeit
 
 
-def coordinates(scene, cam, armature, keypoint_bones):
+def coordinates(scene, cam, armature, keypoint_bones, use_tail=False):
+    """
+    :param use_tail: to use tail instead of head as bone keypoint
+    """
     bone_nb = len(keypoint_bones)
     coords_2d = np.empty((bone_nb, 2))
     coords_3d = np.empty((bone_nb, 3))
     for i, bone_name in enumerate(keypoint_bones):
         bone = armature.pose.bones[bone_name]
-        coord_3d = armature.matrix_world * bone.tail
+        if use_tail:
+            coord_3d = armature.matrix_world * bone.tail
+        else:
+            coord_3d = armature.matrix_world * bone.head
         coord_2d = list(world_to_camera_view(scene, cam, coord_3d))
         coords_3d[i] = list(coord_3d)
         render_scale = scene.render.resolution_percentage / 100
