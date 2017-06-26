@@ -18,6 +18,7 @@ background_folder = asset_folder + "backgrounds/"
 # Rendered data folderes
 rgb_folder = annot_folder + "rgb/"
 depth_folder = annot_folder + "depth/"
+depthpng_folder = annot_folder + "depthpng/"
 
 # Annotation data folders
 coord_2d_folder = annot_folder + "2Dcoord/"
@@ -40,6 +41,7 @@ folders["coord_3d"] = coord_3d_folder
 folders["segm"] = segm_folder
 
 folders["depth"] = depth_folder
+folders["depthpng"] = depthpng_folder
 folders["rgb"] = rgb_folder
 
 folders["background"] = background_folder

@@ -14,8 +14,10 @@ def read_depth(path):
     depth = depth3channels[:, :, 0]
     return depth
 
+
 def visualize_sample(prefix, folders):
     rgb_folder = folders['rgb']
+    depthpng_folder = folders["depthpng"]
     depth_folder = folders["depth"]
     coord_2d_folder = folders["coord_2d"]
     coord_3d_folder = folders["coord_3d"]
