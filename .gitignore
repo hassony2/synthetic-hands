@@ -1,5 +1,7 @@
 /data
 
+config.ini
+
 *.pyc
 *.swp
 *.swo

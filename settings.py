@@ -1,8 +1,9 @@
 import configparser
 import os
+import sys
 config = configparser.ConfigParser()
 
-root = "."
+root = os.path.abspath(os.path.dirname(sys.argv[0]))
 blender_script_folder = os.path.join(root, "blender-scripts")
 data_folder = os.path.join(root, "data")
 
