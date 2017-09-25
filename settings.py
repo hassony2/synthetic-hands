@@ -1,29 +1,29 @@
 import configparser
+import os
 config = configparser.ConfigParser()
 
-root = "/home/local2/yhasson/first-person-action-recognition/"
-blender_script_folder = root + "blender-scripts/"
-data_folder = root + "data/"
+root = "."
+blender_script_folder = os.path.join(root, "blender-scripts")
+data_folder = os.path.join(root, "data")
 
-export_folder = data_folder + "blender-renders/"
-asset_folder = data_folder + "blender-assets/"
+export_folder = os.path.join(data_folder, "blender-renders")
+asset_folder = os.path.join(data_folder, "blender-assets")
 
-image_folder = export_folder + "images/"
-annot_folder = export_folder + "annots/"
+image_folder = os.path.join(export_folder, "images")
+annot_folder = os.path.join(export_folder, "annots")
 # Blender assets folders
-scene_folder = asset_folder + "scene/"
-background_folder = asset_folder + "backgrounds/"
-
+scene_folder = os.path.join(asset_folder + "scene")
+background_folder = os.path.join(asset_folder, "backgrounds")
 
 # Rendered data folderes
-rgb_folder = annot_folder + "rgb/"
-depth_folder = annot_folder + "depth/"
-depthpng_folder = annot_folder + "depthpng/"
+rgb_folder = os.path.join(annot_folder, "rgb")
+depth_folder = os.path.join(annot_folder, "depth")
+depthpng_folder = os.path.join(annot_folder, "depthpng")
 
 # Annotation data folders
-coord_2d_folder = annot_folder + "2Dcoord/"
-coord_3d_folder = annot_folder + "3Dcoord/"
-segm_folder = annot_folder + "segm/"
+coord_2d_folder = os.path.join(annot_folder, "2Dcoord")
+coord_3d_folder = os.path.join(annot_folder, "3Dcoord")
+segm_folder = os.path.join(annot_folder, "segm")
 
 folders = {}
 
