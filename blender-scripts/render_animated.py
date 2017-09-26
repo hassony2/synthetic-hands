@@ -19,6 +19,9 @@ reload(filesys)
 
 # Parse arguments
 parser = argparse.ArgumentParser()
+_, all_args = parser.parse_known_args()
+script_args = all_args[all_args.index('--') + 1:]
+
 parser.add_argument(
     '--person',
     type=str,
@@ -28,7 +31,7 @@ parser.add_argument(
     '--trimmed',
     action='store_true',
     help='whether to add the "_trimmed" suffix to file names')
-args, all_args = parser.parse_known_args()
+args, _ = parser.parse_known_args(script_args)
 
 # Read config parser
 config = configparser.ConfigParser()
@@ -75,6 +78,7 @@ render_nbs = 10000
 
 trimmed_suffix = '-trimmed'
 fileprefix = args.person + (trimmed_suffix if args.trimmed else '')
+print('fileprefix : {}'.format(fileprefix))
 
 if render:
     for render_nb in range(render_nbs):
