@@ -20,19 +20,19 @@ reload(filesys)
 # Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    '--person',
-    type=str,
-    default='malcolm',
-    help='Name of the character (used to name files')
+        '--person',
+        type=str,
+        default='malcolm',
+        help='Name of the character (used to name files')
 parser.add_argument(
-    '--trimmed',
-    action='store_true',
-    help='whether to add the "_trimmed" suffix to file names')
+        '--trimmed',
+        action='store_true',
+        help='whether to add the "_trimmed" suffix to file names')
 args, all_args = parser.parse_known_args()
 
 # Read config parser
 config = configparser.ConfigParser()
-config.read(os.path.join(root, 'config.ini'))
+config.read(os.path.join(os.path.dirname(root), 'config.ini'))
 render = True
 
 arm = bpy.data.objects['Armature']
@@ -44,14 +44,14 @@ folders = config['folders']
 fingers = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
 bone_idxs = ['1', '2', '3', '4']
 bone_names = [
-    'mixamorig_RightHand{0}{1}'.format(finger, idx)
-    for finger in fingers for idx in bone_idxs
-]
+        'mixamorig_RightHand{0}{1}'.format(finger, idx)
+        for finger in fingers for idx in bone_idxs
+        ]
 
 actions = [
-    'PlayGuitar', 'PickupObject', 'SittingThumbsUp', 'BangFist', 'Count',
-    'Piano', 'Beckoning'
-]
+        'PlayGuitar', 'PickupObject', 'SittingThumbsUp', 'BangFist', 'Count',
+        'Piano', 'Beckoning'
+        ]
 spots = ['Spot1', 'Spot2', 'Spot3']
 spot_values = list(range(0, 1001, 200))
 camera_names = ['Camera', 'Camera2']
@@ -86,14 +86,14 @@ if render:
         finger = random.choice(fingers)
         bone_idx = random.choice(bone_idxs)
         bone_name = 'mixamorig_RightHand{finger}{idx}'.format(
-            finger=finger, idx=bone_idx)
+                finger=finger, idx=bone_idx)
         const = blender.follow_bone(
-            arm,
-            camera_name,
-            bone_name=bone_name,
-            track_axis='z',
-            track_axis_neg=True,
-            up_axis='y')
+                arm,
+                camera_name,
+                bone_name=bone_name,
+                track_axis='z',
+                track_axis_neg=True,
+                up_axis='y')
 
         # Randomly pick background
         bg_name = random.choice(bg_names)
@@ -101,13 +101,13 @@ if render:
 
         filename = fileprefix + '{idx}-'.format(idx=render_nb)
         blender.set_cycle_nodes(
-            scene,
-            background_img=bg_img,
-            filename=filename,
-            segm=True,
-            segm_folder=segm_folder,
-            segm_mats=['Bodymat'],
-            depth_folder=depth_folder)
+                scene,
+                background_img=bg_img,
+                filename=filename,
+                segm=True,
+                segm_folder=segm_folder,
+                segm_mats=['Bodymat'],
+                depth_folder=depth_folder)
 
         # Randomly pick action
         action_name = random.choice(actions)
@@ -119,14 +119,14 @@ if render:
             spot = bpy.data.lamps[spot_name]
             spot_value = random.choice(spot_values)
             spot.node_tree.nodes['Emission'].inputs[
-                1].default_value = spot_value
+                    1].default_value = spot_value
 
-        file_template = fileprefix
+            file_template = fileprefix
         blender.render_frames(
-            scene,
-            cam,
-            arm,
-            folders,
-            bone_names,
-            file_template=file_template,
-            rendering_idx=render_nb)
+                scene,
+                cam,
+                arm,
+                folders,
+                bone_names,
+                file_template=file_template,
+                rendering_idx=render_nb)
