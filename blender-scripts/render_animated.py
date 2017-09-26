@@ -1,9 +1,11 @@
-import bpy
+import argparse
 import configparser
-from importlib import reload
 import os
 import random
 import sys
+
+import bpy
+from importlib import reload
 
 absolute_root = '/home/local2/yhasson/code/first-person-action-recognition/'
 sys.path.insert(0, absolute_root + 'blender-scripts/')
@@ -11,13 +13,27 @@ sys.path.insert(0, absolute_root + 'blender-scripts/')
 from utils import blender
 from utils import filesys
 
-config = configparser.ConfigParser()
-config.read(absolute_root + 'config.ini')
-render = True
-
 # Insure modules are reloaded in blender
 reload(blender)
 reload(filesys)
+
+# Parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '--person',
+    type=str,
+    default='malcolm',
+    help='Name of the character (used to name files')
+parser.add_argument(
+    '--trimmed',
+    action='store_true',
+    help='whether to add the "_trimmed" suffix to file names')
+args, all_args = parser.parse_known_args()
+
+# Read config parser
+config = configparser.ConfigParser()
+config.read(absolute_root + 'config.ini')
+render = True
 
 arm = bpy.data.objects['Armature']
 scene = bpy.context.scene
@@ -55,7 +71,9 @@ rgb_folder = folders['rgb']
 
 render_nbs = 10000
 
-fileprefix = 'malcolm-'
+trimmed_suffix = '-trimmed'
+fileprefix = args.person + (trimmed_suffix if args.trimmed else '')
+
 if render:
     for render_nb in range(render_nbs):
         # Set camera
