@@ -32,7 +32,7 @@ args, all_args = parser.parse_known_args()
 
 # Read config parser
 config = configparser.ConfigParser()
-config.read(absolute_root + 'config.ini')
+config.read(root + 'config.ini')
 render = True
 
 arm = bpy.data.objects['Armature']
