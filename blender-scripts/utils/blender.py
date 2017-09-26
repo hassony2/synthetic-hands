@@ -24,8 +24,7 @@ def coordinates(scene, cam, armature, keypoint_bones, use_tail=False):
         render_scale = scene.render.resolution_percentage / 100
         x_render = int(scene.render.resolution_x * render_scale)
         y_render = int(scene.render.resolution_y * render_scale)
-        coords_2d[i] = [coord_2d[0] *
-                        x_render, coord_2d[1] * y_render]
+        coords_2d[i] = [coord_2d[0] * x_render, coord_2d[1] * y_render]
     return coords_2d, coords_3d
 
 
@@ -41,9 +40,14 @@ def render(scene, cam, rgb_folder, img_name):
 
 
 @timeit
-def render_frames(scene, cam, arm, folders,
-                  bone_names, file_template="render-{0:04d}",
-                  frame_nb=None, rendering_idx=None):
+def render_frames(scene,
+                  cam,
+                  arm,
+                  folders,
+                  bone_names,
+                  file_template="render-{0:04d}",
+                  frame_nb=None,
+                  rendering_idx=None):
     """
     Renders images and annotations
 
@@ -64,17 +68,19 @@ def render_frames(scene, cam, arm, folders,
     render(scene, cam, folders['rgb'], img_name)
 
     # Save coordinates
-    coords_2d, coords_3d = coordinates(
-        scene, cam, arm, bone_names)
+    coords_2d, coords_3d = coordinates(scene, cam, arm, bone_names)
     annot_file_2d = folders['coord_2d'] + img_name + ".txt"
     annot_file_3d = folders['coord_3d'] + img_name + ".txt"
     np.savetxt(annot_file_2d, coords_2d)
     np.savetxt(annot_file_3d, coords_3d)
 
+
 @timeit
-def follow_bone(armature, camera_name="Camera",
+def follow_bone(armature,
+                camera_name="Camera",
                 bone_name="mixamorig_RightHandMiddle4",
-                track_axis=None, track_axis_neg=False,
+                track_axis=None,
+                track_axis_neg=False,
                 up_axis=None):
     cam = bpy.context.scene.objects[camera_name]
     track_bone = cam.constraints.new('TRACK_TO')
@@ -91,8 +97,11 @@ def follow_bone(armature, camera_name="Camera",
 
 
 @timeit
-def set_cycle_nodes(scene, background_img, filename,
-                    segm=True, segm_folder=None,
+def set_cycle_nodes(scene,
+                    background_img,
+                    filename,
+                    segm=True,
+                    segm_folder=None,
                     segm_mats=[],
                     depth_folder=None):
     """
@@ -156,6 +165,6 @@ def set_cycle_nodes(scene, background_img, filename,
         segm_node.base_path = segm_folder
         segm_node.file_slots[0].path = filename
         segm_node.location = 200, -200
-        node_tree.links.new(
-            render_node.outputs['IndexMA'], segm_node.inputs[0])
+        node_tree.links.new(render_node.outputs['IndexMA'],
+                            segm_node.inputs[0])
     return segm_node, depth_node
