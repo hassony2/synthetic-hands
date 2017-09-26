@@ -7,8 +7,8 @@ import sys
 import bpy
 from importlib import reload
 
-absolute_root = '/home/local2/yhasson/code/first-person-action-recognition/'
-sys.path.insert(0, absolute_root + 'blender-scripts/')
+root = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, root)
 
 from utils import blender
 from utils import filesys
