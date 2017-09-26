@@ -1,6 +1,7 @@
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
 import numpy as np
+import os
 import random
 
 from utils.debug import timeit
@@ -34,7 +35,7 @@ def render(scene, cam, rgb_folder, img_name):
     Render images according to cycle nodes
     """
     scene.camera = cam
-    scene.render.filepath = rgb_folder + img_name
+    scene.render.filepath = os.path.join(rgb_folder, img_name)
     scene.render.image_settings.file_format = 'PNG'
     bpy.ops.render.render(write_still=True)
 
@@ -69,8 +70,8 @@ def render_frames(scene,
 
     # Save coordinates
     coords_2d, coords_3d = coordinates(scene, cam, arm, bone_names)
-    annot_file_2d = folders['coord_2d'] + img_name + ".txt"
-    annot_file_3d = folders['coord_3d'] + img_name + ".txt"
+    annot_file_2d = os.path.join(folders['coord_2d'], img_name + ".txt")
+    annot_file_3d = os.path.join(folders['coord_3d'], img_name + ".txt")
     np.savetxt(annot_file_2d, coords_2d)
     np.savetxt(annot_file_3d, coords_3d)
 
