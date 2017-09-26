@@ -13,7 +13,7 @@ asset_folder = os.path.join(data_folder, "blender-assets")
 image_folder = os.path.join(export_folder, "images")
 annot_folder = os.path.join(export_folder, "annots")
 # Blender assets folders
-scene_folder = os.path.join(asset_folder + "scene")
+scene_folder = os.path.join(asset_folder, "scene")
 background_folder = os.path.join(asset_folder, "backgrounds")
 
 # Rendered data folderes
