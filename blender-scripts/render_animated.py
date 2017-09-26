@@ -7,8 +7,8 @@ import sys
 import bpy
 from importlib import reload
 
-absolute_root = '/home/local2/yhasson/code/first-person-action-recognition/'
-sys.path.insert(0, absolute_root + 'blender-scripts/')
+root = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, root)
 
 from utils import blender
 from utils import filesys
@@ -32,7 +32,7 @@ args, all_args = parser.parse_known_args()
 
 # Read config parser
 config = configparser.ConfigParser()
-config.read(absolute_root + 'config.ini')
+config.read(root + 'config.ini')
 render = True
 
 arm = bpy.data.objects['Armature']
