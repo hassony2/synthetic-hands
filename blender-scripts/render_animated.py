@@ -40,6 +40,10 @@ parser.add_argument(
         type=int,
         default=10,
         help='Number of frames to render')
+parser.add_argument(
+        '--lsun',
+        action='store_true',
+        help="Using gül's LSUN dataset")
 args, _ = parser.parse_known_args(script_args)
 
 # Read config parser
@@ -71,10 +75,13 @@ camera_names = ['Camera', 'Camera2']
 for folder in folders.values():
     filesys.create_dir(folder)
 
-train_list_path = os.path.join(args.background_folder, 'train_img.txt')
-bg_names = [
-        os.path.join(args.background_folder, line.strip()) for line in open(train_list_path)
-        ]
+if args.lsun:
+    train_list_path = os.path.join(args.background_folder, 'train_img.txt')
+    bg_names = [
+            os.path.join(args.background_folder, line.strip()) for line in open(train_list_path)
+            ]
+else:
+    bg_names = [os.path.join(args.background_folder, file_name) for file_name in os.listdir(args.background_folder)]
 
 depth_folder = folders['depth']
 segm_folder = folders['segm']
