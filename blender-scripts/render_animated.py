@@ -68,7 +68,7 @@ actions = [
     'Piano', 'Beckoning'
 ]
 spots = ['Spot1', 'Spot2', 'Spot3']
-spot_values = list(range(0, 1001, 200))
+spot_values = [0, 200, 400, 800, 1000]
 camera_names = ['Camera', 'Camera2']
 
 for folder in folders.values():
