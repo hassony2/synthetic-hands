@@ -1,8 +1,11 @@
+import codecs
+import json
+import os
+import random
+
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
 import numpy as np
-import os
-import random
 
 from utils.debug import timeit
 
@@ -45,6 +48,7 @@ def render_frames(scene,
                   cam,
                   arm,
                   folders,
+                  hand_side,
                   bone_names,
                   file_template="render-{0:04d}",
                   frame_nb=None,
@@ -72,8 +76,14 @@ def render_frames(scene,
     coords_2d, coords_3d = coordinates(scene, cam, arm, bone_names)
     annot_file_2d = os.path.join(folders['coord_2d'], img_name + ".txt")
     annot_file_3d = os.path.join(folders['coord_3d'], img_name + ".txt")
-    np.savetxt(annot_file_2d, coords_2d)
-    np.savetxt(annot_file_3d, coords_3d)
+    json.dump({
+        'coords': coords_2d.tolist(),
+        'hand': hand_side
+    }, codecs.open(annot_file_2d, 'w'))
+    json.dump({
+        'coords': coords_3d.tolist(),
+        'hand': hand_side
+    }, codecs.open(annot_file_3d, 'w'))
 
 
 @timeit
