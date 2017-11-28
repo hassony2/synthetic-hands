@@ -4,8 +4,7 @@ from importlib import reload
 import sys
 
 absolute_root = '/home/local2/yhasson/first-person-action-recognition/'
-sys.path.insert(
-    0, absolute_root + 'blender-scripts/')
+sys.path.insert(0, absolute_root + 'blender-scripts/')
 
 from utils import blender
 from utils import filesys
@@ -31,7 +30,6 @@ coord_2d_folder = folders["coord_2d"]
 coord_3d_folder = folders["coord_2d"]
 segm_folder = folders["segm"]
 
-
 # Create folders if absent
 filesys.create_dir(coord_2d_folder)
 filesys.create_dir(coord_3d_folder)
@@ -48,10 +46,10 @@ background_folder = folders["background"]
 background_path = background_folder + image_name
 background_img = bpy.data.images.load(background_path)
 
-
-bone_names = ["mixamorig:RightHand{0}{1}".format(finger, idx)
-              for finger in fingers
-              for idx in bone_idxs]
+bone_names = [
+    "mixamorig:RightHand{0}{1}".format(finger, idx)
+    for finger in fingers for idx in bone_idxs
+]
 if render:
     # Render frames
     frame_beg = scene.frame_start
@@ -60,14 +58,21 @@ if render:
     camera_names = ['Headcam']
     for camera_name in camera_names:
         filename = "regina-pick-up-cup-{cam}".format(cam=camera_name.lower())
-        blender.set_cycle_nodes(scene, background_img, filename=filename,
-                                segm=True, segm_folder=segm_folder,
-                                segm_mats=['Material.003',
-                                           'mia_material_x2SG'],
-                                depth_folder=depth_folder)
+        blender.set_cycle_nodes(
+            scene,
+            background_img,
+            filename=filename,
+            segm=True,
+            segm_folder=segm_folder,
+            segm_mats=['Material.003', 'mia_material_x2SG'],
+            depth_folder=depth_folder)
 
         file_template = filename + "{0:04d}"
-        blender.render_frames(scene, cam, arm,
-                              folders,
-                              bone_names,
-                              file_template=file_template)
+        blender.render_frames(
+            scene,
+            cam,
+            arm,
+            folders,
+            hand_side,
+            bone_names,
+            file_template=file_template)
