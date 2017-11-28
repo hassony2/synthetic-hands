@@ -8,6 +8,7 @@ from bpy_extras.object_utils import world_to_camera_view
 import numpy as np
 
 from utils.debug import timeit
+from utils import randomutils
 
 
 def coordinates(scene, cam, armature, keypoint_bones, use_tail=False):
@@ -52,7 +53,8 @@ def render_frames(scene,
                   bone_names,
                   file_template="render-{0:04d}",
                   frame_nb=None,
-                  rendering_idx=None):
+                  rendering_idx=None,
+                  args=None):
     """
     Renders images and annotations
 
@@ -64,6 +66,14 @@ def render_frames(scene,
         frame_nb = random.choice(frame_nbs)
     scene.frame_set(frame_nb)
     bpy.context.scene.camera = cam
+
+    if args.hands:
+        randomutils.move_on_sphere(
+            cam,
+            arm,
+            arm.pose.bones['mixamorig_{}HandMiddle1'.format(
+                hand_side.title())],
+            radius=args.radius)
 
     # Render images
     suffix = "{0:04d}".format(frame_nb)

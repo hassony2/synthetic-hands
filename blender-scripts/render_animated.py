@@ -38,6 +38,21 @@ parser.add_argument(
     action='store_true',
     help='whether to add the "_trimmed" suffix to file names')
 parser.add_argument(
+    '--hands',
+    action='store_true',
+    help='Whether to randomly position camera on sphere around hand')
+parser.add_argument(
+    '--radius',
+    type=float,
+    default='0.5',
+    help='Radius when camera is randomly positioned on sphere')
+parser.add_argument(
+    '--resolution',
+    type=int,
+    default=40,
+    help=
+    'Percentage for rendering resulution (the lower, the smaller the image)')
+parser.add_argument(
     '--background_folder',
     type=str,
     help='Path to folder containing the backgrounds')
@@ -78,7 +93,7 @@ folders = {
 
 arm = bpy.data.objects['Armature']
 scene = bpy.context.scene
-scene.render.resolution_percentage = 50
+scene.render.resolution_percentage = args.resolution
 
 # Hand bone name variables
 hand_sides = ['right', 'left']
@@ -127,67 +142,69 @@ trimmed_suffix = '-trimmed'
 fileprefix = args.person + (trimmed_suffix if args.trimmed else '')
 print('fileprefix : {}'.format(fileprefix))
 
-if not args.no_render:
-    for render_idx in range(args.render_nb):
-        # Pick hand
-        hand_side = random.choice(hand_sides)
-        if hand_side == 'right':
-            bone_names = right_bone_names
-        if hand_side == 'left':
-            bone_names = left_bone_names
+for render_idx in range(args.render_nb):
+    # Pick hand
+    hand_side = random.choice(hand_sides)
+    if hand_side == 'right':
+        bone_names = right_bone_names
+    if hand_side == 'left':
+        bone_names = left_bone_names
 
-        # Set camera
+    # Set camera
+    if args.hands:
+        camera_name = camera_names[0]
+        obj_cam = bpy.data.objects[camera_name]
+    else:
         camera_name = random.choice(camera_names)
         obj_cam = bpy.data.objects[camera_name]
 
-        # Randomly set focal length between bounds
-        cam_cam = bpy.data.cameras[camera_name]
-        cam_cam.lens = random.randint(args.focal_min, args.focal_max)
+    # Randomly set focal length between bounds
+    cam_cam = bpy.data.cameras[obj_cam.name]
+    cam_cam.lens = random.randint(args.focal_min, args.focal_max)
 
-        # Clear camera constraints
-        for const in obj_cam.constraints:
-            obj_cam.constraints.remove(const)
-        # Camera follows hand
-        finger = random.choice(fingers)
-        bone_idx = random.choice(bone_idxs)
-        bone_name = 'mixamorig_{hand_side}Hand{finger}{idx}'.format(
-            hand_side=hand_side.title(), finger=finger, idx=bone_idx)
-        print(bone_name)
-        const = blender.follow_bone(
-            arm,
-            camera_name,
-            bone_name=bone_name,
-            track_axis='z',
-            track_axis_neg=True,
-            up_axis='y')
+    # Clear camera constraints
+    for const in obj_cam.constraints:
+        obj_cam.constraints.remove(const)
+    # Camera follows hand
+    finger = random.choice(fingers)
+    bone_idx = random.choice(bone_idxs)
+    bone_name = 'mixamorig_{hand_side}Hand{finger}{idx}'.format(
+        hand_side=hand_side.title(), finger=finger, idx=bone_idx)
 
-        # Randomly pick background
-        bg_name = random.choice(bg_names)
-        bg_img = bpy.data.images.load(bg_name)
+    # Randomly pick background
+    bg_name = random.choice(bg_names)
+    bg_img = bpy.data.images.load(bg_name)
 
-        filename = fileprefix + '{idx}-'.format(idx=render_idx)
-        blender.set_cycle_nodes(
-            scene,
-            background_img=bg_img,
-            filename=filename,
-            segm=True,
-            segm_folder=folders['segm'],
-            segm_mats=['Bodymat'],
-            depth_folder=folders['depth'])
+    filename = fileprefix + '{idx}-'.format(idx=render_idx)
+    blender.set_cycle_nodes(
+        scene,
+        background_img=bg_img,
+        filename=filename,
+        segm=True,
+        segm_folder=folders['segm'],
+        segm_mats=['Bodymat'],
+        depth_folder=folders['depth'])
 
-        # Randomly pick action
-        action_name = random.choice(actions)
-        action = bpy.data.actions[action_name]
-        arm.animation_data.action = action
+    # Randomly pick action
+    action_name = random.choice(actions)
+    action = bpy.data.actions[action_name]
+    arm.animation_data.action = action
 
-        # Randomly change light emission of spots
-        for spot_name in spots:
-            spot = bpy.data.lamps[spot_name]
-            spot_value = random.choice(spot_values)
-            spot.node_tree.nodes['Emission'].inputs[
-                1].default_value = spot_value
+    const = blender.follow_bone(
+        arm,
+        obj_cam.name,
+        bone_name=bone_name,
+        track_axis='z',
+        track_axis_neg=True,
+        up_axis='y')
+    # Randomly change light emission of spots
+    for spot_name in spots:
+        spot = bpy.data.lamps[spot_name]
+        spot_value = random.choice(spot_values)
+        spot.node_tree.nodes['Emission'].inputs[1].default_value = spot_value
 
-            file_template = fileprefix
+        file_template = fileprefix
+    if args.no_render is False:
         blender.render_frames(
             scene,
             obj_cam,
@@ -196,4 +213,5 @@ if not args.no_render:
             hand_side=hand_side,
             bone_names=bone_names,
             file_template=file_template,
-            rendering_idx=render_idx)
+            rendering_idx=render_idx,
+            args=args)
